@@ -9,34 +9,48 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 220 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 142 20% 96%;
+    --secondary-foreground: 142 71% 25%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 142 35% 92%;
+    --accent-foreground: 142 71% 25%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 142 71% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Advisor-specific design tokens */
+    --advisor-green: 142 71% 45%;
+    --advisor-green-light: 142 35% 92%;
+    --advisor-green-dark: 142 71% 25%;
+    --advisor-gray: 220 15% 15%;
+    --advisor-gray-light: 220 10% 95%;
+    --advisor-gradient: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 60% 55%));
+    --advisor-shadow: 0 10px 30px -10px hsl(142 71% 45% / 0.2);
+    --advisor-shadow-hover: 0 20px 40px -10px hsl(142 71% 45% / 0.3);
+    
+    /* Typography */
+    --font-heading: 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,33 +70,43 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 220 25% 8%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 220 20% 12%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 20% 12%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 142 71% 55%;
+    --primary-foreground: 220 25% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 220 15% 18%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 220 15% 18%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 220 15% 18%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 142 71% 55%;
+    
+    /* Dark mode advisor tokens */
+    --advisor-green: 142 71% 55%;
+    --advisor-green-light: 142 20% 20%;
+    --advisor-green-dark: 142 71% 65%;
+    --advisor-gray: 210 40% 98%;
+    --advisor-gray-light: 220 15% 18%;
+    --advisor-gradient: linear-gradient(135deg, hsl(142 71% 55%), hsl(142 60% 65%));
+    --advisor-shadow: 0 10px 30px -10px hsl(142 71% 55% / 0.3);
+    --advisor-shadow-hover: 0 20px 40px -10px hsl(142 71% 55% / 0.4);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -100,6 +124,32 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .advisor-gradient {
+    background: var(--advisor-gradient);
+  }
+  
+  .advisor-shadow {
+    box-shadow: var(--advisor-shadow);
+  }
+  
+  .advisor-shadow-hover {
+    box-shadow: var(--advisor-shadow-hover);
+  }
+  
+  .hero-text {
+    @apply text-5xl md:text-6xl font-bold leading-tight;
+  }
+  
+  .section-text {
+    @apply text-lg text-muted-foreground leading-relaxed;
   }
 }

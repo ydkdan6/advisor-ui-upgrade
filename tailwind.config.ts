@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				advisor: {
+					green: 'hsl(var(--advisor-green))',
+					'green-light': 'hsl(var(--advisor-green-light))',
+					'green-dark': 'hsl(var(--advisor-green-dark))',
+					gray: 'hsl(var(--advisor-gray))',
+					'gray-light': 'hsl(var(--advisor-gray-light))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -62,6 +69,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			fontFamily: {
+				heading: 'var(--font-heading)',
+				body: 'var(--font-body)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
