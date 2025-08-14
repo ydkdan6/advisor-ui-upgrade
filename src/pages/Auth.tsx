@@ -1,3 +1,5 @@
+Well I copied it and made some fix, prolly it may work. 
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,11 +29,12 @@ const loginSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const Auth = () => {
+export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Keep forms persistent and prevent unregistering
   const signupForm = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -42,6 +45,7 @@ const Auth = () => {
       email: "",
       password: "",
     },
+    shouldUnregister: false,
   });
 
   const loginForm = useForm<LoginFormData>({
@@ -50,6 +54,7 @@ const Auth = () => {
       email: "",
       password: "",
     },
+    shouldUnregister: false,
   });
 
   const handleSignup = async (data: SignupFormData) => {
@@ -59,7 +64,7 @@ const Auth = () => {
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: ${window.location.origin}/,
           data: {
             full_name: data.full_name,
             date_of_birth: data.date_of_birth,
@@ -70,23 +75,12 @@ const Auth = () => {
       });
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        toast({
-          title: "Success",
-          description: "Please check your email to confirm your account.",
-        });
+        toast({ title: "Success", description: "Please check your email to confirm your account." });
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -101,23 +95,12 @@ const Auth = () => {
       });
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
-        toast({
-          title: "Success",
-          description: "Successfully logged in!",
-        });
+        toast({ title: "Success", description: "Successfully logged in!" });
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +120,8 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLogin ? (
+          {/* Login Form */}
+          {isLogin && (
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                 <FormField
@@ -172,7 +156,10 @@ const Auth = () => {
                 </Button>
               </form>
             </Form>
-          ) : (
+          )}
+
+          {/* Signup Form */}
+          {!isLogin && (
             <Form {...signupForm}>
               <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
                 <FormField
@@ -260,7 +247,7 @@ const Auth = () => {
               </form>
             </Form>
           )}
-          
+
           <div className="mt-6 text-center">
             <Button
               variant="link"
@@ -276,6 +263,4 @@ const Auth = () => {
       </Card>
     </div>
   );
-};
-
-export default Auth;
+}
