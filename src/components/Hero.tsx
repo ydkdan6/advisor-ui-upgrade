@@ -28,9 +28,12 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 className="advisor-gradient hover:advisor-shadow-hover transition-all duration-300 text-lg px-8 py-6 group"
+                asChild
               >
-                Start Your Financial Journey
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <a href="/auth">
+                  Start Your Financial Journey
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </a>
               </Button>
               <Button 
                 variant="outline" 
