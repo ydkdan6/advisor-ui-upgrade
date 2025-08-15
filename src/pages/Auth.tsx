@@ -1,5 +1,3 @@
-Well I copied it and made some fix, prolly it may work. 
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,7 +62,7 @@ export default function Auth() {
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: ${window.location.origin}/,
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: data.full_name,
             date_of_birth: data.date_of_birth,
@@ -79,7 +77,7 @@ export default function Auth() {
       } else {
         toast({ title: "Success", description: "Please check your email to confirm your account." });
       }
-    } catch {
+    } catch (error) {
       toast({ title: "Error", description: "An unexpected error occurred", variant: "destructive" });
     } finally {
       setIsLoading(false);
@@ -99,7 +97,7 @@ export default function Auth() {
       } else {
         toast({ title: "Success", description: "Successfully logged in!" });
       }
-    } catch {
+    } catch (error) {
       toast({ title: "Error", description: "An unexpected error occurred", variant: "destructive" });
     } finally {
       setIsLoading(false);
