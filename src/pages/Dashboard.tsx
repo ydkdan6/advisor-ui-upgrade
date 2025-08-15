@@ -20,6 +20,7 @@ import DashboardFeatures from "@/components/DashboardFeatures";
 import TransactionManager from "@/components/TransactionManager";
 import AIAdvisor from "@/components/AIAdvisor";
 import DashboardWidget from "@/components/DashboardWidget";
+import FinancialQuotes from "@/components/FinancialQuotes";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -99,9 +100,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <h1 className="text-2xl font-bold text-primary">FinanceAdvisor</h1>
@@ -132,12 +133,12 @@ const Dashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
             {/* Welcome Section */}
-            <Card>
+            <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
               <CardHeader>
-                <CardTitle className="text-xl">
+                <CardTitle className="text-2xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Welcome back, {profile?.full_name?.split(" ")[0] || "User"}!
                 </CardTitle>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-lg">
                   Here's your financial overview for today
                 </p>
               </CardHeader>
@@ -158,8 +159,11 @@ const Dashboard = () => {
             {/* Quick Stats Widget */}
             <DashboardWidget />
 
+            {/* Financial Quotes Widget */}
+            <FinancialQuotes />
+
             {/* Goals Progress */}
-            <Card>
+            <Card className="bg-gradient-to-br from-background to-primary/5 border-primary/20">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
                   <Target className="h-5 w-5 mr-2 text-primary" />
@@ -168,10 +172,10 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="p-3 rounded-lg bg-primary/10">
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium">Emergency Fund</span>
-                      <Badge variant="secondary">75%</Badge>
+                      <Badge variant="secondary" className="bg-primary/10 text-primary">75%</Badge>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
                       <div className="bg-primary h-2 rounded-full" style={{ width: "75%" }}></div>
@@ -179,10 +183,10 @@ const Dashboard = () => {
                     <p className="text-xs text-muted-foreground mt-1">$7,500 / $10,000</p>
                   </div>
                   
-                  <div className="p-3 rounded-lg bg-accent/10">
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium">Vacation Fund</span>
-                      <Badge variant="secondary">45%</Badge>
+                      <Badge variant="secondary" className="bg-accent/10 text-accent-foreground">45%</Badge>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
                       <div className="bg-accent h-2 rounded-full" style={{ width: "45%" }}></div>
@@ -194,7 +198,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Recent Activity */}
-            <Card>
+            <Card className="bg-gradient-to-br from-background to-accent/5">
               <CardHeader>
                 <CardTitle className="text-lg">Recent Activity</CardTitle>
               </CardHeader>

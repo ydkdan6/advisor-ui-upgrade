@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Bot, Send, Loader2 } from "lucide-react";
+import { Brain, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -41,21 +41,27 @@ const AIAdvisor = () => {
     setIsLoading(true);
 
     try {
-      // Simulate AI response with financial advice
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Call Gemini AI for intelligent responses
+      const response = await fetch('/functions/v1/gemini-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: inputMessage,
+          conversationHistory: messages.slice(1), // Exclude initial greeting
+        }),
+      });
 
-      const responses = [
-        "Based on your spending patterns, I recommend setting aside 20% of your income for savings. Would you like me to help you create a detailed budget?",
-        "Your emergency fund goal is excellent! Consider investing in a high-yield savings account or money market fund for better returns while maintaining liquidity.",
-        "I notice you're interested in investments. For beginners, I recommend starting with index funds or ETFs for diversification. What's your risk tolerance?",
-        "Great question about budgeting! The 50/30/20 rule is a good starting point: 50% for needs, 30% for wants, and 20% for savings and debt repayment.",
-        "To improve your credit score, focus on paying bills on time, keeping credit utilization below 30%, and avoid closing old credit accounts.",
-        "For retirement planning, consider maximizing your 401(k) match first, then look into Roth IRA contributions. Time is your greatest asset!",
-      ];
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const { reply } = await response.json();
 
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: responses[Math.floor(Math.random() * responses.length)],
+        content: reply,
         isUser: false,
         timestamp: new Date(),
       };
@@ -84,15 +90,15 @@ const AIAdvisor = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center">
-            <Bot className="h-6 w-6 mr-2 text-primary" />
+            <Brain className="h-6 w-6 mr-2 text-primary" />
             AI Financial Advisor
           </CardTitle>
           <div className="flex items-center space-x-2">
-            <Badge variant="secondary" className="text-xs">
-              78% Accuracy
+            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+              Advanced AI
             </Badge>
             <Badge variant="outline" className="text-xs">
-              Advanced AI
+              Powered by Gemini
             </Badge>
           </div>
         </div>

@@ -1,142 +1,170 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const transactionSchema = z.object({
-  amount: z.string().min(1, "Amount is required"),
-  description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required"),
-  type: z.enum(["income", "expense"]),
-  date: z.string().min(1, "Date is required"),
-});
-
-type TransactionFormData = z.infer<typeof transactionSchema>;
+import { supabase } from "@/integrations/supabase/client";
+import { formatCurrency, SUPPORTED_CURRENCIES } from "@/utils/currencies";
 
 interface Transaction {
   id: string;
-  amount: number;
-  description: string;
-  category: string;
   type: "income" | "expense";
+  amount: number;
+  category: string;
+  description: string;
   date: string;
-  created_at: string;
+  currency: string;
+}
+
+interface TransactionForm {
+  type: "income" | "expense";
+  amount: string;
+  category: string;
+  description: string;
+  date: string;
+  currency: string;
 }
 
 const TransactionManager = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  const form = useForm<TransactionFormData>({
-    resolver: zodResolver(transactionSchema),
-    defaultValues: {
-      amount: "",
-      description: "",
-      category: "",
-      type: "expense",
-      date: new Date().toISOString().split("T")[0],
-    },
+  const [userCurrency, setUserCurrency] = useState("USD");
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState<TransactionForm>({
+    type: "expense",
+    amount: "",
+    category: "",
+    description: "",
+    date: new Date().toISOString().split("T")[0],
+    currency: "USD",
   });
-
-  const categories = [
-    "Food & Dining",
-    "Transportation",
-    "Shopping",
-    "Entertainment",
-    "Bills & Utilities",
-    "Healthcare",
-    "Travel",
-    "Education",
-    "Salary",
-    "Investment",
-    "Other",
-  ];
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchTransactions();
+    fetchUserProfile();
   }, []);
 
-  const fetchTransactions = async () => {
+  const fetchUserProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("date", { ascending: false })
-        .limit(10);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-      if (error) {
-        console.error("Error fetching transactions:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch transactions",
-          variant: "destructive",
-        });
-      } else {
-        setTransactions((data || []) as Transaction[]);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("currency")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profile?.currency) {
+        setUserCurrency(profile.currency);
+        setForm(prev => ({ ...prev, currency: profile.currency }));
       }
     } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching user profile:", error);
     }
   };
 
-  const handleAddTransaction = async (data: TransactionFormData) => {
+  const fetchTransactions = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to add transactions",
-          variant: "destructive",
-        });
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching transactions:", error);
         return;
       }
 
-      const { error } = await supabase.from("transactions").insert({
-        user_id: user.id,
-        amount: parseFloat(data.amount),
-        description: data.description,
-        category: data.category,
-        type: data.type,
-        date: data.date,
-      });
-
-      if (error) {
-        console.error("Error adding transaction:", error);
-        toast({
-          title: "Error",
-          description: "Failed to add transaction",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Transaction added successfully",
-        });
-        form.reset();
-        setShowForm(false);
-        fetchTransactions();
-      }
+      setTransactions(data || []);
     } catch (error) {
       console.error("Error:", error);
+    }
+  };
+
+  const handleAddTransaction = async () => {
+    if (!form.amount || !form.category || !form.description) {
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "Please fill in all fields",
         variant: "destructive",
       });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase.from("transactions").insert([
+        {
+          user_id: user.id,
+          type: form.type,
+          amount: parseFloat(form.amount),
+          category: form.category,
+          description: form.description,
+          date: form.date,
+          currency: form.currency,
+        },
+      ]).select().single();
+
+      if (error) throw error;
+
+      // Get AI advice for this transaction
+      try {
+        const adviceResponse = await fetch('/functions/v1/generate-transaction-advice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transaction: data }),
+        });
+
+        if (adviceResponse.ok) {
+          const { advice } = await adviceResponse.json();
+          toast({
+            title: "Transaction Added & AI Advice",
+            description: advice,
+            duration: 8000,
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: "Transaction added successfully!",
+          });
+        }
+      } catch (adviceError) {
+        toast({
+          title: "Success",
+          description: "Transaction added successfully!",
+        });
+      }
+
+      setForm({
+        type: "expense",
+        amount: "",
+        category: "",
+        description: "",
+        date: new Date().toISOString().split("T")[0],
+        currency: form.currency,
+      });
+      fetchTransactions();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add transaction",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -147,203 +175,206 @@ const TransactionManager = () => {
         .delete()
         .eq("id", id);
 
-      if (error) {
-        console.error("Error deleting transaction:", error);
-        toast({
-          title: "Error",
-          description: "Failed to delete transaction",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Transaction deleted successfully",
-        });
-        fetchTransactions();
-      }
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Transaction deleted successfully!",
+      });
+      fetchTransactions();
     } catch (error) {
-      console.error("Error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete transaction",
+        variant: "destructive",
+      });
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+  const formatCurrencyDisplay = (amount: number, currency: string) => {
+    return formatCurrency(amount, currency);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">Transaction Manager</CardTitle>
-          <Button onClick={() => setShowForm(!showForm)} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Add Transaction Form */}
+      <Card className="bg-gradient-to-br from-background to-muted/20">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Plus className="h-5 w-5 mr-2 text-primary" />
             Add Transaction
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {showForm && (
-          <div className="mb-6 p-4 border rounded-lg bg-muted/50">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleAddTransaction)} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="income">Income</SelectItem>
-                            <SelectItem value="expense">Expense</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Amount</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Transaction description" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button type="submit">Add Transaction</Button>
-                  <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
-        )}
-
-        <div className="space-y-3">
-          <h4 className="font-medium">Recent Transactions</h4>
-          {loading ? (
-            <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="type">Type</Label>
+              <Select value={form.type} onValueChange={(value: "income" | "expense") => setForm({ ...form, type: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="income">
+                    <div className="flex items-center">
+                      <ArrowUpCircle className="h-4 w-4 mr-2 text-primary" />
+                      Income
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="expense">
+                    <div className="flex items-center">
+                      <ArrowDownCircle className="h-4 w-4 mr-2 text-destructive" />
+                      Expense
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          ) : transactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
-              No transactions yet. Add your first transaction above.
-            </p>
-          ) : (
-            transactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
-              >
-                <div className="flex items-center space-x-3">
-                  {transaction.type === "income" ? (
-                    <ArrowUpRight className="h-4 w-4 text-primary" />
-                  ) : (
-                    <ArrowDownRight className="h-4 w-4 text-destructive" />
-                  )}
-                  <div>
-                    <p className="font-medium">{transaction.description}</p>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select value={form.category} onValueChange={(value) => setForm({ ...form, category: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Food & Dining">Food & Dining</SelectItem>
+                  <SelectItem value="Transportation">Transportation</SelectItem>
+                  <SelectItem value="Shopping">Shopping</SelectItem>
+                  <SelectItem value="Entertainment">Entertainment</SelectItem>
+                  <SelectItem value="Bills & Utilities">Bills & Utilities</SelectItem>
+                  <SelectItem value="Healthcare">Healthcare</SelectItem>
+                  <SelectItem value="Travel">Travel</SelectItem>
+                  <SelectItem value="Education">Education</SelectItem>
+                  <SelectItem value="Salary">Salary</SelectItem>
+                  <SelectItem value="Investment">Investment</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <Select value={form.currency} onValueChange={(value) => setForm({ ...form, currency: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_CURRENCIES.map((currency) => (
+                    <SelectItem key={currency.code} value={currency.code}>
+                      {currency.symbol} {currency.code} - {currency.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Enter transaction description..."
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              disabled={loading}
+              rows={3}
+            />
+          </div>
+
+          <Button 
+            onClick={handleAddTransaction} 
+            disabled={loading} 
+            className="w-full"
+          >
+            {loading ? "Adding..." : "Add Transaction"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Transaction List */}
+      <Card className="bg-gradient-to-br from-background to-accent/5">
+        <CardHeader>
+          <CardTitle>Recent Transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {transactions.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                No transactions yet. Add your first transaction!
+              </p>
+            ) : (
+              transactions.slice(0, 10).map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      {transaction.type === "income" ? (
+                        <ArrowUpCircle className="h-5 w-5 text-primary" />
+                      ) : (
+                        <ArrowDownCircle className="h-5 w-5 text-destructive" />
+                      )}
+                      <div>
+                        <p className="font-medium">{transaction.description}</p>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {transaction.category}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(transaction.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                     <div className="flex items-center space-x-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {transaction.category}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(transaction.date).toLocaleDateString()}
+                      <span className={`font-bold ${
+                        transaction.type === "income" ? "text-primary" : "text-destructive"
+                      }`}>
+                        {transaction.type === "income" ? "+" : "-"}{formatCurrencyDisplay(transaction.amount, transaction.currency)}
                       </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteTransaction(transaction.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`font-medium ${
-                      transaction.type === "income" ? "text-primary" : "text-destructive"
-                    }`}
-                  >
-                    {transaction.type === "income" ? "+" : "-"}
-                    {formatCurrency(transaction.amount)}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteTransaction(transaction.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </CardContent>
-    </Card>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

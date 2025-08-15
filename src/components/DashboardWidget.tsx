@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatCurrency } from "@/utils/currencies";
 
 interface FinancialSummary {
   totalIncome: number;
   totalExpenses: number;
   netIncome: number;
   transactionCount: number;
+  currency: string;
 }
 
 const DashboardWidget = () => {
@@ -17,6 +19,7 @@ const DashboardWidget = () => {
     totalExpenses: 0,
     netIncome: 0,
     transactionCount: 0,
+    currency: "USD",
   });
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +33,15 @@ const DashboardWidget = () => {
       
       if (!user) return;
 
+      // Get user's preferred currency
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("currency")
+        .eq("user_id", user.id)
+        .single();
+
+      const userCurrency = profile?.currency || "USD";
+
       // Get current month's transactions
       const currentDate = new Date();
       const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -37,8 +49,9 @@ const DashboardWidget = () => {
 
       const { data: transactions, error } = await supabase
         .from("transactions")
-        .select("amount, type")
+        .select("amount, type, currency")
         .eq("user_id", user.id)
+        .eq("currency", userCurrency)
         .gte("date", firstDayOfMonth.toISOString().split("T")[0])
         .lte("date", lastDayOfMonth.toISOString().split("T")[0]);
 
@@ -60,6 +73,7 @@ const DashboardWidget = () => {
         totalExpenses,
         netIncome: totalIncome - totalExpenses,
         transactionCount: transactions?.length || 0,
+        currency: userCurrency,
       });
     } catch (error) {
       console.error("Error:", error);
@@ -68,13 +82,8 @@ const DashboardWidget = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const formatCurrencyDisplay = (amount: number) => {
+    return formatCurrency(amount, summary.currency);
   };
 
   if (loading) {
@@ -109,7 +118,7 @@ const DashboardWidget = () => {
             <TrendingUp className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium">Income</span>
           </div>
-          <span className="font-bold text-primary">{formatCurrency(summary.totalIncome)}</span>
+          <span className="font-bold text-primary">{formatCurrencyDisplay(summary.totalIncome)}</span>
         </div>
 
         {/* Total Expenses */}
@@ -118,7 +127,7 @@ const DashboardWidget = () => {
             <TrendingDown className="h-4 w-4 text-destructive" />
             <span className="text-sm font-medium">Expenses</span>
           </div>
-          <span className="font-bold text-destructive">{formatCurrency(summary.totalExpenses)}</span>
+          <span className="font-bold text-destructive">{formatCurrencyDisplay(summary.totalExpenses)}</span>
         </div>
 
         {/* Net Income */}
@@ -132,7 +141,7 @@ const DashboardWidget = () => {
               summary.netIncome >= 0 ? "text-primary" : "text-destructive"
             }`}
           >
-            {formatCurrency(summary.netIncome)}
+            {formatCurrencyDisplay(summary.netIncome)}
           </span>
         </div>
 

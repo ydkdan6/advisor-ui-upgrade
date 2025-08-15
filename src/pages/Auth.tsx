@@ -2,13 +2,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { SUPPORTED_CURRENCIES } from "@/utils/currencies";
 
 const signupSchema = z.object({
   full_name: z.string().min(2, "Full name must be at least 2 characters"),
@@ -16,6 +17,7 @@ const signupSchema = z.object({
   nationality: z.string().min(2, "Nationality is required"),
   phone_number: z.string().min(10, "Phone number must be at least 10 digits"),
   email: z.string().email("Invalid email address"),
+  currency: z.string().min(1, "Currency is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -32,7 +34,6 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Keep forms persistent and prevent unregistering
   const signupForm = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -42,6 +43,7 @@ export default function Auth() {
       phone_number: "",
       email: "",
       password: "",
+      currency: "USD",
     },
     shouldUnregister: false,
   });
@@ -68,6 +70,7 @@ export default function Auth() {
             date_of_birth: data.date_of_birth,
             nationality: data.nationality,
             phone_number: data.phone_number,
+            currency: data.currency,
           },
         },
       });
@@ -118,8 +121,7 @@ export default function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Login Form */}
-          {isLogin && (
+          {isLogin ? (
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                 <FormField
@@ -149,15 +151,11 @@ export default function Auth() {
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
+                  {isLoading ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
             </Form>
-          )}
-
-          {/* Signup Form */}
-          {!isLogin && (
+          ) : (
             <Form {...signupForm}>
               <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
                 <FormField
@@ -238,9 +236,32 @@ export default function Auth() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={signupForm.control}
+                  name="currency"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Preferred Currency</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {SUPPORTED_CURRENCIES.map((currency) => (
+                            <SelectItem key={currency.code} value={currency.code}>
+                              {currency.symbol} {currency.code} - {currency.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Account
+                  {isLoading ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
             </Form>

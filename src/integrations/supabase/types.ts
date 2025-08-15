@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -43,6 +43,7 @@ export type Database = {
           amount: number
           category: string
           created_at: string
+          currency: string
           id: string
           period: string
           updated_at: string
@@ -52,6 +53,7 @@ export type Database = {
           amount: number
           category: string
           created_at?: string
+          currency?: string
           id?: string
           period?: string
           updated_at?: string
@@ -61,6 +63,7 @@ export type Database = {
           amount?: number
           category?: string
           created_at?: string
+          currency?: string
           id?: string
           period?: string
           updated_at?: string
@@ -68,10 +71,38 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_quotes: {
+        Row: {
+          author: string
+          category: string
+          created_at: string
+          id: string
+          quote: string
+          updated_at: string
+        }
+        Insert: {
+          author: string
+          category?: string
+          created_at?: string
+          id?: string
+          quote: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          category?: string
+          created_at?: string
+          id?: string
+          quote?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           category: string
           created_at: string
+          currency: string
           current_amount: number
           id: string
           target_amount: number
@@ -83,6 +114,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          currency?: string
           current_amount?: number
           id?: string
           target_amount: number
@@ -94,6 +126,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          currency?: string
           current_amount?: number
           id?: string
           target_amount?: number
@@ -108,6 +141,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
           current_value: number
           id: string
           name: string
@@ -119,6 +153,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
           current_value: number
           id?: string
           name: string
@@ -130,6 +165,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
           current_value?: number
           id?: string
           name?: string
@@ -143,6 +179,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          currency: string
           date_of_birth: string
           full_name: string
           id: string
@@ -153,6 +190,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string
           date_of_birth: string
           full_name: string
           id?: string
@@ -163,6 +201,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string
           date_of_birth?: string
           full_name?: string
           id?: string
@@ -179,6 +218,7 @@ export type Database = {
           account_type: string
           balance: number
           created_at: string
+          currency: string
           id: string
           updated_at: string
           user_id: string
@@ -188,6 +228,7 @@ export type Database = {
           account_type?: string
           balance?: number
           created_at?: string
+          currency?: string
           id?: string
           updated_at?: string
           user_id: string
@@ -197,6 +238,7 @@ export type Database = {
           account_type?: string
           balance?: number
           created_at?: string
+          currency?: string
           id?: string
           updated_at?: string
           user_id?: string
@@ -208,6 +250,7 @@ export type Database = {
           amount: number
           category: string
           created_at: string
+          currency: string
           date: string
           description: string
           id: string
@@ -219,6 +262,7 @@ export type Database = {
           amount: number
           category: string
           created_at?: string
+          currency?: string
           date?: string
           description: string
           id?: string
@@ -230,6 +274,7 @@ export type Database = {
           amount?: number
           category?: string
           created_at?: string
+          currency?: string
           date?: string
           description?: string
           id?: string
