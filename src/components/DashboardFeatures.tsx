@@ -8,7 +8,11 @@ import {
   Bot,
 } from "lucide-react";
 
-const DashboardFeatures = () => {
+interface DashboardFeaturesProps {
+  onFeatureClick: (feature: string) => void;
+}
+
+const DashboardFeatures = ({ onFeatureClick }: DashboardFeaturesProps) => {
   const features = [
     {
       icon: Wallet,
@@ -16,6 +20,7 @@ const DashboardFeatures = () => {
       description: "Track and manage your spending",
       color: "text-blue-600",
       bgColor: "bg-blue-50 dark:bg-blue-950/20",
+      key: "budget"
     },
     {
       icon: Target,
@@ -23,6 +28,7 @@ const DashboardFeatures = () => {
       description: "Set and achieve financial targets",
       color: "text-green-600",
       bgColor: "bg-green-50 dark:bg-green-950/20",
+      key: "goals"
     },
     {
       icon: TrendingUp,
@@ -30,6 +36,7 @@ const DashboardFeatures = () => {
       description: "Monitor your portfolio growth",
       color: "text-purple-600",
       bgColor: "bg-purple-50 dark:bg-purple-950/20",
+      key: "investments"
     },
     {
       icon: PiggyBank,
@@ -37,6 +44,7 @@ const DashboardFeatures = () => {
       description: "Build your emergency fund",
       color: "text-orange-600",
       bgColor: "bg-orange-50 dark:bg-orange-950/20",
+      key: "savings"
     },
     {
       icon: Bot,
@@ -44,6 +52,7 @@ const DashboardFeatures = () => {
       description: "Get personalized financial advice",
       color: "text-primary",
       bgColor: "bg-primary/10",
+      key: "ai"
     },
   ];
 
@@ -59,6 +68,7 @@ const DashboardFeatures = () => {
                 key={index}
                 variant="ghost"
                 className="h-auto p-4 flex flex-col items-center space-y-2 hover:bg-muted/50"
+                onClick={() => onFeatureClick(feature.key)}
               >
                 <div className={`p-3 rounded-full ${feature.bgColor}`}>
                   <Icon className={`h-6 w-6 ${feature.color}`} />

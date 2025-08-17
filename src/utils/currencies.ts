@@ -20,6 +20,22 @@ export const SUPPORTED_CURRENCIES: Currency[] = [
   { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$' },
   { code: 'SEK', name: 'Swedish Krona', symbol: 'kr' },
   { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr' },
+  // African Currencies
+  { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
+  { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
+  { code: 'EGP', name: 'Egyptian Pound', symbol: '£' },
+  { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
+  { code: 'GHS', name: 'Ghanaian Cedi', symbol: '₵' },
+  { code: 'UGX', name: 'Ugandan Shilling', symbol: 'USh' },
+  { code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh' },
+  { code: 'ETB', name: 'Ethiopian Birr', symbol: 'Br' },
+  { code: 'MAD', name: 'Moroccan Dirham', symbol: 'DH' },
+  { code: 'TND', name: 'Tunisian Dinar', symbol: 'DT' },
+  { code: 'BWP', name: 'Botswana Pula', symbol: 'P' },
+  { code: 'ZMW', name: 'Zambian Kwacha', symbol: 'ZK' },
+  { code: 'MWK', name: 'Malawian Kwacha', symbol: 'MK' },
+  { code: 'RWF', name: 'Rwandan Franc', symbol: 'RF' },
+  { code: 'XOF', name: 'West African CFA Franc', symbol: 'CFA' },
 ];
 
 export const formatCurrency = (amount: number, currencyCode: string): string => {

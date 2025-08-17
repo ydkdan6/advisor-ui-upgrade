@@ -93,14 +93,6 @@ const AIAdvisor = () => {
             <Brain className="h-6 w-6 mr-2 text-primary" />
             AI Financial Advisor
           </CardTitle>
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
-              Advanced AI
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              Powered by Gemini
-            </Badge>
-          </div>
         </div>
       </CardHeader>
       <CardContent>

@@ -21,12 +21,17 @@ import TransactionManager from "@/components/TransactionManager";
 import AIAdvisor from "@/components/AIAdvisor";
 import DashboardWidget from "@/components/DashboardWidget";
 import FinancialQuotes from "@/components/FinancialQuotes";
+import BudgetManager from "@/components/BudgetManager";
+import GoalsManager from "@/components/GoalsManager";
+import InvestmentManager from "@/components/InvestmentManager";
+import SavingsManager from "@/components/SavingsManager";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<string>('dashboard');
 
   useEffect(() => {
     // Set up auth state listener
@@ -77,6 +82,10 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleFeatureClick = (feature: string) => {
+    setActiveView(feature);
   };
 
   if (loading) {
@@ -144,90 +153,39 @@ const Dashboard = () => {
               </CardHeader>
             </Card>
 
-            {/* Feature Buttons */}
-            <DashboardFeatures />
-
-            {/* Transaction Manager */}
-            <TransactionManager />
-
-            {/* AI Advisor */}
-            <AIAdvisor />
+            {/* Content based on active view */}
+            {activeView === 'dashboard' && (
+              <>
+                <DashboardFeatures onFeatureClick={handleFeatureClick} />
+                <TransactionManager />
+                <AIAdvisor />
+              </>
+            )}
+            {activeView === 'budget' && <BudgetManager />}
+            {activeView === 'goals' && <GoalsManager />}
+            {activeView === 'investments' && <InvestmentManager />}
+            {activeView === 'savings' && <SavingsManager />}
+            {activeView === 'ai' && <AIAdvisor />}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Stats Widget */}
-            <DashboardWidget />
-
-            {/* Financial Quotes Widget */}
-            <FinancialQuotes />
-
-            {/* Goals Progress */}
-            <Card className="bg-gradient-to-br from-background to-primary/5 border-primary/20">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Target className="h-5 w-5 mr-2 text-primary" />
-                  Goals Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">Emergency Fund</span>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary">75%</Badge>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: "75%" }}></div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">$7,500 / $10,000</p>
-                  </div>
-                  
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">Vacation Fund</span>
-                      <Badge variant="secondary" className="bg-accent/10 text-accent-foreground">45%</Badge>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-accent h-2 rounded-full" style={{ width: "45%" }}></div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">$2,250 / $5,000</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card className="bg-gradient-to-br from-background to-accent/5">
-              <CardHeader>
-                <CardTitle className="text-lg">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ArrowDownRight className="h-4 w-4 text-destructive" />
-                      <span className="text-sm">Grocery Store</span>
-                    </div>
-                    <span className="text-sm font-medium text-destructive">-$85.50</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ArrowUpRight className="h-4 w-4 text-primary" />
-                      <span className="text-sm">Salary</span>
-                    </div>
-                    <span className="text-sm font-medium text-primary">+$3,200.00</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ArrowDownRight className="h-4 w-4 text-destructive" />
-                      <span className="text-sm">Netflix</span>
-                    </div>
-                    <span className="text-sm font-medium text-destructive">-$15.99</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {activeView === 'dashboard' && (
+              <>
+                <DashboardWidget />
+                <FinancialQuotes />
+              </>
+            )}
+            
+            {activeView !== 'dashboard' && (
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveView('dashboard')}
+                className="w-full"
+              >
+                ← Back to Dashboard
+              </Button>
+            )}
           </div>
         </div>
       </div>
