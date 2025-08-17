@@ -85,7 +85,13 @@ const TransactionManager = () => {
         return;
       }
 
-      setTransactions(data || []);
+      // Type cast and validate the data
+      const validatedTransactions: Transaction[] = (data || []).map(transaction => ({
+        ...transaction,
+        type: transaction.type as "income" | "expense"
+      }));
+
+      setTransactions(validatedTransactions);
     } catch (error) {
       console.error("Error:", error);
     }
