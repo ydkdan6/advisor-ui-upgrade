@@ -21,6 +21,7 @@ import TransactionManager from "@/components/TransactionManager";
 import AIAdvisor from "@/components/AIAdvisor";
 import DashboardWidget from "@/components/DashboardWidget";
 import FinancialQuotes from "@/components/FinancialQuotes";
+import QuickStatsWidget from "@/components/QuickStatsWidget";
 import BudgetManager from "@/components/BudgetManager";
 import GoalsManager from "@/components/GoalsManager";
 import InvestmentManager from "@/components/InvestmentManager";
@@ -32,6 +33,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<string>('dashboard');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     // Set up auth state listener
@@ -86,6 +88,10 @@ const Dashboard = () => {
 
   const handleFeatureClick = (feature: string) => {
     setActiveView(feature);
+  };
+
+  const handleTransactionUpdate = () => {
+    setRefreshTrigger(prev => prev + 1);
   };
 
   if (loading) {
@@ -157,7 +163,7 @@ const Dashboard = () => {
             {activeView === 'dashboard' && (
               <>
                 <DashboardFeatures onFeatureClick={handleFeatureClick} />
-                <TransactionManager />
+                <TransactionManager onTransactionUpdate={handleTransactionUpdate} />
                 <AIAdvisor />
               </>
             )}
@@ -172,8 +178,9 @@ const Dashboard = () => {
           <div className="space-y-6">
             {activeView === 'dashboard' && (
               <>
-                <DashboardWidget />
+                <DashboardWidget refreshTrigger={refreshTrigger} />
                 <FinancialQuotes />
+                <QuickStatsWidget />
               </>
             )}
             

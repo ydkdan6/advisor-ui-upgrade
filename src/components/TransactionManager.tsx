@@ -30,7 +30,11 @@ interface TransactionForm {
   currency: string;
 }
 
-const TransactionManager = () => {
+interface TransactionManagerProps {
+  onTransactionUpdate?: () => void;
+}
+
+const TransactionManager = ({ onTransactionUpdate }: TransactionManagerProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [userCurrency, setUserCurrency] = useState("USD");
   const [loading, setLoading] = useState(false);
@@ -152,6 +156,11 @@ const TransactionManager = () => {
           title: "Success",
           description: "Transaction added successfully!",
         });
+      }
+
+      // Trigger dashboard widget refresh
+      if (onTransactionUpdate) {
+        onTransactionUpdate();
       }
 
       setForm({

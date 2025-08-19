@@ -13,7 +13,11 @@ interface FinancialSummary {
   currency: string;
 }
 
-const DashboardWidget = () => {
+interface DashboardWidgetProps {
+  refreshTrigger?: number;
+}
+
+const DashboardWidget = ({ refreshTrigger }: DashboardWidgetProps) => {
   const [summary, setSummary] = useState<FinancialSummary>({
     totalIncome: 0,
     totalExpenses: 0,
@@ -25,7 +29,7 @@ const DashboardWidget = () => {
 
   useEffect(() => {
     fetchFinancialSummary();
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchFinancialSummary = async () => {
     try {
