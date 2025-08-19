@@ -22,6 +22,7 @@ import AIAdvisor from "@/components/AIAdvisor";
 import DashboardWidget from "@/components/DashboardWidget";
 import FinancialQuotes from "@/components/FinancialQuotes";
 import QuickStatsWidget from "@/components/QuickStatsWidget";
+import SpendingAnalyticsWidget from "@/components/SpendingAnalyticsWidget";
 import BudgetManager from "@/components/BudgetManager";
 import GoalsManager from "@/components/GoalsManager";
 import InvestmentManager from "@/components/InvestmentManager";
@@ -181,6 +182,7 @@ const Dashboard = () => {
                 <DashboardWidget refreshTrigger={refreshTrigger} />
                 <FinancialQuotes />
                 <QuickStatsWidget />
+                <SpendingAnalyticsWidget />
               </>
             )}
             
