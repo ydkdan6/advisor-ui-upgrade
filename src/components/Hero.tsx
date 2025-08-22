@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, TrendingUp, Shield, Brain } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -30,8 +31,8 @@ const Hero = () => {
                 className="advisor-gradient hover:advisor-shadow-hover transition-all duration-300 text-lg px-8 py-6 group"
                 asChild
               >
-                <a href="/auth">
-                  Start Your Financial Journey
+                <a>
+                  <Link to='/auth'>Start Your Financial Journey</Link>
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>
