@@ -2,7 +2,9 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+const geminiApiKey ='AIzaSyC0xGhFQ3UqHYySinMPfJRzCAezUfIkVX8';
+const url = 'https://aqcusbrhdnsmefpawupb.supabase.co';
+const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxY3VzYnJoZG5zbWVmcGF3dXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxMjg0MjcsImV4cCI6MjA3MDcwNDQyN30.WEWqTWan3mhoOE7Ay6J86M9DLsCXY8Rp23eTctxem6k';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,8 +37,8 @@ serve(async (req) => {
     
     // Create a Supabase client for this request
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      url ?? '',
+      key ?? '',
       {
         global: {
           headers: {

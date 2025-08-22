@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Brain, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,7 +16,7 @@ const AIAdvisor = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello! I'm your AI Financial Advisor. I can help you with budgeting, investment strategies, savings goals, and financial planning. What would you like to discuss today?",
+      content: "Hello! I'm your AI Financial Advisor. I can help you with budgeting, investment strategies, savings goals, and general financial planning advice. What would you like to discuss today?",
       isUser: false,
       timestamp: new Date(),
     },
@@ -26,8 +25,45 @@ const AIAdvisor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Direct Gemini API call (for testing - move to Edge Function later)
+  const callGeminiDirectly = async (message: string) => {
+    const geminiApiKey = 'AIzaSyC0xGhFQ3UqHYySinMPfJRzCAezUfIkVX8';
+    const systemPrompt = `You are a helpful financial advisor. Provide practical financial advice on budgeting, saving, investing, and money management. Keep responses concise but informative.`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: `${systemPrompt}\n\nUser question: ${message}` }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 800
+          }
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 
+      "I'm sorry, I couldn't generate a response. Please try again.";
+  };
+
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -37,42 +73,43 @@ const AIAdvisor = () => {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage("");
     setIsLoading(true);
 
     try {
-      // Call Gemini AI for intelligent responses
-      const response = await fetch('/functions/v1/gemini-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputMessage,
-          conversationHistory: messages.slice(1), // Exclude initial greeting
-        }),
-      });
+      console.log('Calling Gemini directly...');
 
-      if (!response.ok) {
-        throw new Error('Failed to get AI response');
-      }
-
-      const { reply } = await response.json();
-
+      // Skip Edge Function for now, use direct Gemini call
+      console.log('Using direct Gemini API call...');
+      const reply = await callGeminiDirectly(currentMessage);
+      
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         content: reply,
         isUser: false,
         timestamp: new Date(),
       };
-
+      
       setMessages((prev) => [...prev, aiResponse]);
+
     } catch (error) {
+      console.error('All methods failed:', error);
+      
       toast({
         title: "Error",
         description: "Failed to get AI response. Please try again.",
         variant: "destructive",
       });
+
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        content: "Sorry, I'm having trouble connecting right now. Please try again.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+
     } finally {
       setIsLoading(false);
     }
@@ -82,6 +119,12 @@ const AIAdvisor = () => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleQuickMessage = (message: string) => {
+    if (!isLoading) {
+      setInputMessage(message);
     }
   };
 
@@ -111,7 +154,7 @@ const AIAdvisor = () => {
                       : "bg-background border shadow-sm"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   <p className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -154,26 +197,26 @@ const AIAdvisor = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setInputMessage("How should I budget my income?")}
+              onClick={() => handleQuickMessage("How should I create a monthly budget?")}
               disabled={isLoading}
             >
-              Budgeting tips
+              Budgeting Help
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setInputMessage("What investments should I consider?")}
+              onClick={() => handleQuickMessage("What's a good investment strategy for beginners?")}
               disabled={isLoading}
             >
-              Investment advice
+              Investment Advice
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setInputMessage("Help me save for emergency fund")}
+              onClick={() => handleQuickMessage("How much should I save for an emergency fund?")}
               disabled={isLoading}
             >
-              Savings strategy
+              Emergency Fund
             </Button>
           </div>
         </div>
