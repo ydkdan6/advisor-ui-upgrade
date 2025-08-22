@@ -25,7 +25,7 @@ const AIAdvisor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Direct Gemini API call (for testing - move to Edge Function later)
+  // Direct Gemini API call 
   const callGeminiDirectly = async (message: string) => {
     const geminiApiKey = 'AIzaSyC0xGhFQ3UqHYySinMPfJRzCAezUfIkVX8';
     const systemPrompt = `You are a helpful financial advisor. Provide practical financial advice on budgeting, saving, investing, and money management. Keep responses concise but informative.`;
@@ -80,7 +80,7 @@ const AIAdvisor = () => {
     try {
       console.log('Calling Gemini directly...');
 
-      // Skip Edge Function for now, use direct Gemini call
+      
       console.log('Using direct Gemini API call...');
       const reply = await callGeminiDirectly(currentMessage);
       
